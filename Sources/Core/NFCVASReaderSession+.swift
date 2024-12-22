@@ -52,6 +52,17 @@ private final class NFCVASReaderSessionDelegateHandleObject: NSObject, NFCVASRea
     var continuation: AsyncStream<NFCVASReaderSession.Event>.Continuation?
     
     func readerSessionDidBecomeActive(_ session: NFCVASReaderSession) {
+        let invalidator = NFCReaderSessionInvalidator(session)
+        continuation?.onTermination = { @Sendable in
+            switch $0 {
+            case .finished:
+                break
+            case .cancelled:
+                invalidator.invalidate(errorMessage: invalidator.alertMessage)
+            @unknown default:
+                break
+            }
+        }
         continuation?.yield(.sessionBecomeActive)
     }
     

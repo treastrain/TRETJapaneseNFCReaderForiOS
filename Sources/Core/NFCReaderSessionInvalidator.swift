@@ -13,6 +13,10 @@ package final class NFCReaderSessionInvalidator<Base: NFCReaderSessionProtocol>:
         self.readerSession = readerSession
     }
     
+    package var alertMessage: String {
+        readerSession?.alertMessage ?? ""
+    }
+    
     package func invalidate(errorMessage: String) {
         readerSession?.invalidate(errorMessage: errorMessage)
     }

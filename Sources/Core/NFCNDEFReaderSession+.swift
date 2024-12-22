@@ -98,6 +98,17 @@ private final class NFCNDEFReaderSessionDelegateHandleObjectForMessage: NSObject
     var continuation: AsyncStream<NFCNDEFReaderSession.MessageEvent>.Continuation?
     
     func readerSessionDidBecomeActive(_ session: NFCNDEFReaderSession) {
+        let invalidator = NFCReaderSessionInvalidator(session)
+        continuation?.onTermination = { @Sendable in
+            switch $0 {
+            case .finished:
+                break
+            case .cancelled:
+                invalidator.invalidate(errorMessage: invalidator.alertMessage)
+            @unknown default:
+                break
+            }
+        }
         continuation?.yield(.sessionBecomeActive)
     }
     
@@ -117,6 +128,17 @@ private final class NFCNDEFReaderSessionDelegateHandleObjectForTag: NSObject, NF
     var continuation: AsyncStream<NFCNDEFReaderSession.TagEvent>.Continuation?
     
     func readerSessionDidBecomeActive(_ session: NFCNDEFReaderSession) {
+        let invalidator = NFCReaderSessionInvalidator(session)
+        continuation?.onTermination = { @Sendable in
+            switch $0 {
+            case .finished:
+                break
+            case .cancelled:
+                invalidator.invalidate(errorMessage: invalidator.alertMessage)
+            @unknown default:
+                break
+            }
+        }
         continuation?.yield(.sessionBecomeActive)
     }
     
