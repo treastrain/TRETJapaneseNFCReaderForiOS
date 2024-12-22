@@ -56,6 +56,17 @@ private final class NFCTagReaderSessionDelegateHandleObject: NSObject, NFCTagRea
     var continuation: AsyncStream<NFCTagReaderSession.Event>.Continuation?
     
     func tagReaderSessionDidBecomeActive(_ session: NFCTagReaderSession) {
+        let invalidator = NFCReaderSessionInvalidator(session)
+        continuation?.onTermination = { @Sendable in
+            switch $0 {
+            case .finished:
+                break
+            case .cancelled:
+                invalidator.invalidate(errorMessage: invalidator.alertMessage)
+            @unknown default:
+                break
+            }
+        }
         continuation?.yield(.sessionBecomeActive)
     }
     
